@@ -32,6 +32,7 @@ public class ShowItemsActivity extends AppCompatActivity {
         ItemAdapter adapter = new ItemAdapter(this, items);
         recyclerView.setAdapter(adapter);
 
+        // if clicked, returns to main menu.
         returnHome.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

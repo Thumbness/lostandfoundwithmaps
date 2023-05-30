@@ -48,9 +48,8 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, ShowItemsActivity.class);
                 startActivity(intent);
             }
-
-
         });
+        //Button that opens google map for item markers
         showMapButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

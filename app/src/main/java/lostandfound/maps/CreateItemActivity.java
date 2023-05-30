@@ -65,6 +65,7 @@ public class CreateItemActivity extends AppCompatActivity {
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         selectedCurrentPosition = false;
 
+        //initialize places API for autocomplete
         if (!Places.isInitialized()) {
             Places.initialize(getApplicationContext(), "AIzaSyAeLJ6t4uZkLR_1EcK2biaU1hBxrOCzfl0");
         }
@@ -79,6 +80,7 @@ public class CreateItemActivity extends AppCompatActivity {
             public void onPlaceSelected(Place place) {
                 selectedPlace = place;
                 locationText.setText(place.getName());
+                //flag for using either current location or autocomplete when saving to db
                 selectedCurrentPosition = false;
             }
 
@@ -90,24 +92,21 @@ public class CreateItemActivity extends AppCompatActivity {
 
         getLocationButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                //Check permissions for current location
                 if (ActivityCompat.checkSelfPermission(CreateItemActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                         && ActivityCompat.checkSelfPermission(CreateItemActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(CreateItemActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
                     return;
                 }
                 mFusedLocationClient.getLastLocation()
-                        .addOnSuccessListener(CreateItemActivity.this, new OnSuccessListener<Location>() {
-                            @Override
-                            public void onSuccess(Location location) {
-                                // Got last known location. In some rare situations this can be null.
-                                if (location != null) {
-                                    // Logic to handle location object
-                                    double latitude = location.getLatitude();
-                                    double longitude = location.getLongitude();
-                                    currentLocation = new LatLng(latitude, longitude);
-                                    selectedCurrentPosition = true;
-                                    Toast.makeText(CreateItemActivity.this, "Successfully saved location", Toast.LENGTH_SHORT).show();
-                                }
+                        .addOnSuccessListener(CreateItemActivity.this, location -> {
+                            if (location != null) {
+                                // Logic to handle location object
+                                double latitude = location.getLatitude();
+                                double longitude = location.getLongitude();
+                                currentLocation = new LatLng(latitude, longitude);
+                                selectedCurrentPosition = true;
+                                Toast.makeText(CreateItemActivity.this, "Successfully saved location", Toast.LENGTH_SHORT).show();
                             }
                         });
             }
@@ -116,6 +115,7 @@ public class CreateItemActivity extends AppCompatActivity {
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //Store as variables
                 Boolean lost = lostCheckbox.isChecked();
                 Boolean found = foundCheckbox.isChecked();
                 String name = nameText.getText().toString();
@@ -123,7 +123,6 @@ public class CreateItemActivity extends AppCompatActivity {
                 String description = descriptionText.getText().toString();
                 String date = dateText.getText().toString();
                 String location = locationText.getText().toString();
-
                 if(selectedCurrentPosition == false){
                     latitude = String.valueOf(selectedPlace.getLatLng().latitude);
                     longitude = String.valueOf(selectedPlace.getLatLng().longitude);
@@ -132,12 +131,7 @@ public class CreateItemActivity extends AppCompatActivity {
                     latitude = String.valueOf(currentLocation.latitude);
                     longitude = String.valueOf(currentLocation.longitude);
                 }
-
                 String status = null;
-
-
-
-
                 if(lost == true && found == false)
                 {
                     status = "Lost";
@@ -150,12 +144,13 @@ public class CreateItemActivity extends AppCompatActivity {
                 {
                     status = "unknown";
                 }
+                //insert values as item into db.
                 long result = db.insertItem(new Item(status, name, description, location, number, date, latitude, longitude));
                 if(result > 0)
                 {
                     Toast.makeText(CreateItemActivity.this, "Successfully entered item into database", Toast.LENGTH_SHORT).show();
                 }
-
+                //return to home page
                 Intent intent = new Intent(CreateItemActivity.this, MainActivity.class);
                 startActivity(intent);
             }

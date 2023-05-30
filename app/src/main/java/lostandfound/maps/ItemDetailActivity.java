@@ -39,6 +39,7 @@ public class ItemDetailActivity extends AppCompatActivity {
         String date = getIntent().getStringExtra("item_date");
         String location = getIntent().getStringExtra("item_location");
 
+        // Set views from intent variables.
         nameText.setText(name);
         descriptionText.setText(description);
         phoneText.setText(phone);
